@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -17,6 +19,16 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val properties = Properties()
+        val propertiesFile = rootProject.file("nework.properties")
+        if (propertiesFile.exists()) {
+            propertiesFile.inputStream().use { input ->
+                properties.load(input)
+            }
+        }
+
+        manifestPlaceholders["backendApiKey"] = properties.getProperty("BACKEND_API_KEY", "")
     }
 
     buildTypes {
@@ -55,6 +67,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
+    implementation(libs.androidx.paging.runtime.ktx)
+    implementation(libs.glide)
+    implementation(libs.androidx.material3)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

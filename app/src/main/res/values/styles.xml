@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Widget.App.LikeCheckBox" parent="Widget.Material3.Button.TextButton.Icon">
+        <item name="iconTint">@color/sel_like</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+    </style>
+
+</resources>

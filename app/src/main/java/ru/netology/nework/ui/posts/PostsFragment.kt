@@ -1,5 +1,7 @@
 package ru.netology.nework.ui.posts
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -10,13 +12,17 @@ import android.view.ViewGroup
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentPostsBinding
 import ru.netology.nework.ui.auth.AuthApp
@@ -38,9 +44,55 @@ class PostsFragment : Fragment() {
 
         val binding = FragmentPostsBinding.inflate(inflater, container, false)
 
-        postsViewModel.text.observe(viewLifecycleOwner) {
-            binding.textHome.text = it
+        val adapter = PostsAdapter { post, key ->
+            when (key) {
+                KeyPostViewHolder.VIDEO -> {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(post.video))
+                    startActivity(intent)
+                }
+
+                KeyPostViewHolder.LIKE -> postsViewModel.likeVM(post.id)
+                KeyPostViewHolder.SHARE -> {
+                    val intent = Intent().apply {
+                        putExtra(Intent.EXTRA_TEXT, post.content)
+                        type = "text/plain"
+                        action = Intent.ACTION_SEND
+                    }
+                    val shareIntent = Intent.createChooser(intent, "Sharing the post")
+                    startActivity(shareIntent)
+                    postsViewModel.shareVM(post.id)
+                }
+
+                KeyPostViewHolder.POST -> {
+//                    findNavController().navigate(
+//                        R.id.action_mainFragment_to_focusFragment,
+//                        Bundle().apply { this.putString("TEXT_TRANSFER", post.id.toString()) })
+                }
+
+                KeyPostViewHolder.REMOVE -> postsViewModel.removeVM(post.id)
+                KeyPostViewHolder.EDIT -> {
+//                    findNavController().navigate(
+//                        R.id.action_mainFragment_to_editorFragment,
+//                        Bundle().apply { this.putString("TEXT_TRANSFER", post.id.toString()) })
+//                    postsViewModel.editVM(post)
+                }
+
+                KeyPostViewHolder.CANCEL -> postsViewModel.cancelEditVM()
+            }
         }
+
+        binding.postsContainerRecycleView.adapter = adapter
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                postsViewModel.data.collectLatest { adapter.submitData(it) }
+            }
+        }
+
+
+//        postsViewModel.text.observe(viewLifecycleOwner) {
+//            binding.textHome.text = it
+//        }
 
         activity?.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

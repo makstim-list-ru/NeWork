@@ -8,6 +8,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import ru.netology.nework.api.ApiKey
 import ru.netology.nework.ui.auth.AuthApp
 import javax.inject.Singleton
 
@@ -16,10 +17,7 @@ import javax.inject.Singleton
 class PostRetrofitModule {
 
     companion object {
-
-        private const val API_KEY = "c1378193-bc0e-42c8-a502-b8d66d189617"
         private const val BASE_URL = "http://94.228.125.136:8080/api/"
-
     }
 
     @Provides
@@ -32,12 +30,13 @@ class PostRetrofitModule {
     @Singleton
     fun provideOkHttpClient(
         logging: HttpLoggingInterceptor,
-        authApp: AuthApp
+        authApp: AuthApp,
+        apiKey: ApiKey,
     ): OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(logging)
         .addInterceptor { chain ->
             val builder = chain.request().newBuilder()
-                .addHeader("Api-Key", API_KEY)
+                .addHeader("Api-Key", apiKey.value)
             val token = authApp.authStateFlow.value.token
             val newRequest = (token?.let { builder.addHeader("Authorization", token) } ?: builder)
                 .build()

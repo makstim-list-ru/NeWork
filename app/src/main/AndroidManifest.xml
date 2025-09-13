@@ -25,6 +25,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <meta-data
+            android:name="ru.netology.nework.backend_api_key"
+            android:value="${backendApiKey}"/>
     </application>
 
 </manifest>

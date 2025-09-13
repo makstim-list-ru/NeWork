@@ -1,0 +1,156 @@
+package ru.netology.nework.ui.posts
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
+import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import ru.netology.nework.R
+import ru.netology.nework.databinding.PostCardBinding
+import ru.netology.nework.ui.retrofit.Post
+import kotlin.math.floor
+import kotlin.math.ln
+import kotlin.math.pow
+
+enum class KeyPostViewHolder { VIDEO, LIKE, SHARE, POST, REMOVE, EDIT, CANCEL }
+
+class PostsAdapter(private val callback: (Post, KeyPostViewHolder) -> Unit) :
+    PagingDataAdapter<Post, RecyclerView.ViewHolder>(PostDiffUtil) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+
+        val binding = PostCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return PostViewHolder(binding, callback)
+    }
+
+    override fun getItemViewType(position: Int) = R.layout.post_card
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val item = getItem(position)
+        when (item) {
+            is Post -> (holder as PostViewHolder).onBindPost(item)
+            else -> error("unknown item type")
+        }
+    }
+}
+
+object PostDiffUtil : DiffUtil.ItemCallback<Post>() {
+    override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
+        if (oldItem::class != newItem::class) return false
+        return oldItem.id == newItem.id
+    }
+
+    override fun areContentsTheSame(
+        oldItem: Post,
+        newItem: Post
+    ): Boolean {
+        return oldItem == newItem
+    }
+}
+
+class PostViewHolder(
+    private val binding: PostCardBinding,
+    private val callback: (Post, KeyPostViewHolder) -> Unit
+) :
+    RecyclerView.ViewHolder(binding.root) {
+    fun onBindPost(post: Post) {
+
+        with(binding) {
+            postAuthor.text = post.author
+            postPublished.text = post.published
+            postContent.text = post.content
+
+            postLike.text = getFormatedNumber(post.likes)
+            postLike.isChecked = post.likedByMe
+
+            postShare.text = getFormatedNumber(post.sharesNum)
+            postViewsNumber.text = getFormatedNumber(post.seenNum)
+
+            postLike.setOnClickListener {
+                callback(post, KeyPostViewHolder.LIKE)
+            }
+
+            postShare.setOnClickListener {
+                callback(post, KeyPostViewHolder.SHARE)
+            }
+
+            postAuthor.setOnClickListener {
+                callback(post, KeyPostViewHolder.POST)
+            }
+            postPublished.setOnClickListener {
+                callback(post, KeyPostViewHolder.POST)
+            }
+            postContent.setOnClickListener {
+                callback(post, KeyPostViewHolder.POST)
+            }
+            postMediaBox.setOnClickListener {
+                callback(post, KeyPostViewHolder.POST)
+            }
+
+            postThreeDotsMenu.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
+
+            postThreeDotsMenu.setOnClickListener { view ->
+                val pum = PopupMenu(view.context, view)
+                pum.inflate(R.menu.menu_options)
+                pum.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.remove -> {
+                            callback(post, KeyPostViewHolder.REMOVE)
+                            true
+                        }
+
+                        R.id.edit -> {
+                            callback(post, KeyPostViewHolder.EDIT)
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
+                pum.show()
+            }
+
+            val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+            Glide.with(binding.postAvatar)
+                .load(url)
+                .circleCrop()
+                .placeholder(R.drawable.ic_loading_100dp)
+                .error(R.drawable.ic_error_100dp)
+                .timeout(10_000)
+                .into(binding.postAvatar)
+
+            Glide.with(postMediaBox).clear(postMediaBox)
+            postMediaBox.visibility = View.GONE
+            post.attachment?.let {
+                postMediaBox.visibility = View.VISIBLE
+                val urlMedia = "http://10.0.2.2:9999/media/${post.attachment.url}"
+                Glide.with(postMediaBox)
+                    .load(urlMedia)
+                    .placeholder(R.drawable.ic_loading_100dp)
+                    .error(R.drawable.ic_error_100dp)
+                    .timeout(10_000)
+                    .into(postMediaBox)
+            }
+        }
+    }
+
+    private fun getFormatedNumber(count: Long): String {
+        if (count < 1000) return "" + count
+        val exp = (ln(count.toDouble()) / ln(1000.0)).toInt()
+        if (count / 1000.0.pow(exp.toDouble()) >= 10) {
+            return String.format("%.0f%c", count / 1000.0.pow(exp.toDouble()), "kMGTPE"[exp - 1])
+        } else {
+            return String.format(
+                "%.1f%c",
+                floor(count / 1000.0.pow(exp.toDouble()) * 10) / 10,
+                "kMGTPE"[exp - 1]
+            )
+        }
+    }
+}
+
+
+
