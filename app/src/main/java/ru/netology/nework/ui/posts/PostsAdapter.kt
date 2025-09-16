@@ -3,14 +3,20 @@ package ru.netology.nework.ui.posts
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.URLUtil
+import android.widget.MediaController
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.net.toUri
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import ru.netology.nework.R
 import ru.netology.nework.databinding.PostCardBinding
+import ru.netology.nework.ui.retrofit.AttachmentType
 import ru.netology.nework.ui.retrofit.Post
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.pow
@@ -58,9 +64,24 @@ class PostViewHolder(
     RecyclerView.ViewHolder(binding.root) {
     fun onBindPost(post: Post) {
 
+        val flagAtt = post.attachment?.let {
+            when (post.attachment.type) {
+                AttachmentType.IMAGE -> "IM"
+                AttachmentType.VIDEO -> "VI"
+                AttachmentType.AUDIO -> "AU"
+            }
+        } ?: "00"
+
         with(binding) {
-            postAuthor.text = post.author
-            postPublished.text = post.published
+            postAuthor.text = String.format(
+                Locale.getDefault(),
+                "%s ID=%d aID=%d %s",
+                post.author,
+                post.id, post.authorId,
+                flagAtt
+            )
+
+            postPublished.text = getFormattedDateTime(post.published)
             postContent.text = post.content
 
             postLike.text = getFormatedNumber(post.likes)
@@ -90,6 +111,17 @@ class PostViewHolder(
                 callback(post, KeyPostViewHolder.POST)
             }
 
+            postMediaBoxVideo.setOnClickListener {
+                postMediaBoxVideo.apply {
+                    val mediaController = MediaController(context)
+                    mediaController.setAnchorView(this)
+                    setMediaController(mediaController)
+                    setVideoURI(post.attachment?.url?.toUri())
+                    setOnPreparedListener { start() }
+                    setOnCompletionListener { stopPlayback() }
+                }
+            }
+
             postThreeDotsMenu.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
 
             postThreeDotsMenu.setOnClickListener { view ->
@@ -113,42 +145,122 @@ class PostViewHolder(
                 pum.show()
             }
 
-            val url = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
-            Glide.with(binding.postAvatar)
-                .load(url)
-                .circleCrop()
-                .placeholder(R.drawable.ic_loading_100dp)
-                .error(R.drawable.ic_error_100dp)
-                .timeout(10_000)
-                .into(binding.postAvatar)
-
-            Glide.with(postMediaBox).clear(postMediaBox)
-            postMediaBox.visibility = View.GONE
-            post.attachment?.let {
-                postMediaBox.visibility = View.VISIBLE
-                val urlMedia = "http://10.0.2.2:9999/media/${post.attachment.url}"
-                Glide.with(postMediaBox)
-                    .load(urlMedia)
+            val url = post.authorAvatar
+            url?.let {
+                binding.postAvatar.visibility = View.VISIBLE
+                Glide.with(binding.postAvatar)
+                    .load(url)
+                    .circleCrop()
                     .placeholder(R.drawable.ic_loading_100dp)
                     .error(R.drawable.ic_error_100dp)
                     .timeout(10_000)
-                    .into(postMediaBox)
+                    .into(binding.postAvatar)
+            } ?: {
+                Glide.with(postAvatar).clear(postAvatar)
+                binding.postAvatar.visibility = View.INVISIBLE
             }
+
+            Glide.with(postMediaBox).clear(postMediaBox)
+            postMediaBox.visibility = View.GONE
+            postMediaBoxVideo.visibility = View.GONE
+
+            post.attachment?.let {
+                if (URLUtil.isValidUrl(post.attachment.url))
+                    when (post.attachment.type) {
+
+                        AttachmentType.IMAGE -> {
+
+                            val urlMedia = post.attachment.url
+                            Glide.with(postMediaBox)
+                                .load(urlMedia)
+                                .placeholder(R.drawable.ic_loading_100dp)
+                                .error(R.drawable.ic_error_100dp)
+                                .timeout(10_000)
+                                .into(postMediaBox)
+
+                            postMediaBox.visibility = View.VISIBLE
+                        }
+
+                        AttachmentType.VIDEO -> {
+
+                            val urlMediaVideo = post.attachment.url
+
+//                            postMediaBoxVideo.apply {
+//                                val mediaController = MediaController(context)
+//                                setMediaController(mediaController)
+//                                setVideoURI(urlMediaVideo.toUri())
+//                                mediaController.show()
+//                                setOnPreparedListener { start() }
+//                                setOnCompletionListener { stopPlayback() }
+//                            }
+
+                            postMediaBoxVideo.visibility = View.VISIBLE
+                        }
+
+                        AttachmentType.AUDIO -> {
+
+                            val urlMediaVideo = post.attachment.url
+
+//                            postMediaBoxVideo.apply {
+//                                val mediaController = MediaController(context)
+//                                setMediaController(mediaController)
+//                                setVideoURI(urlMediaVideo.toUri())
+//                                mediaController.show()
+//                                setOnPreparedListener { start() }
+//                                setOnCompletionListener { stopPlayback() }
+//                            }
+
+                            postMediaBoxVideo.visibility = View.VISIBLE
+                        }
+                    }
+            }
+
+//            post.attachment?.let {
+//                postMediaBox.visibility = View.VISIBLE
+//                val urlMedia = post.attachment.url
+//                Glide.with(postMediaBox)
+//                    .load(urlMedia)
+//                    .placeholder(R.drawable.ic_loading_100dp)
+//                    .error(R.drawable.ic_error_100dp)
+//                    .timeout(10_000)
+//                    .into(postMediaBox)
+//            } ?: {
+//                Glide.with(postMediaBox).clear(postMediaBox)
+//                postMediaBox.visibility = View.GONE
+//            }
         }
     }
 
     private fun getFormatedNumber(count: Long): String {
         if (count < 1000) return "" + count
         val exp = (ln(count.toDouble()) / ln(1000.0)).toInt()
-        if (count / 1000.0.pow(exp.toDouble()) >= 10) {
-            return String.format("%.0f%c", count / 1000.0.pow(exp.toDouble()), "kMGTPE"[exp - 1])
+        return if (count / 1000.0.pow(exp.toDouble()) >= 10) {
+            String.format(
+                Locale.getDefault(),
+                "%.0f%c",
+                count / 1000.0.pow(exp.toDouble()),
+                "kMGTPE"[exp - 1]
+            )
         } else {
-            return String.format(
+            String.format(
+                Locale.getDefault(),
                 "%.1f%c",
                 floor(count / 1000.0.pow(exp.toDouble()) * 10) / 10,
                 "kMGTPE"[exp - 1]
             )
         }
+    }
+
+    private fun getFormattedDateTime(stringIn: String): String {
+
+        if (stringIn.isEmpty()) return ""
+
+        val formatter = DateTimeFormatter.ISO_DATE_TIME
+        val parsedDate = formatter.parse(stringIn)
+        val displayFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:MM")
+        val stringOut = displayFormatter.format(parsedDate)
+
+        return stringOut
     }
 }
 

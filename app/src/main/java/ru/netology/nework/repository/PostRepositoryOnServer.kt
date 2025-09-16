@@ -1,4 +1,4 @@
-package ru.netology.kotlin_for_android_hw_1.repository
+package ru.netology.nework.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,9 +12,6 @@ import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.Response
-import ru.netology.nework.repository.FeedModel
-import ru.netology.nework.repository.PostPagingSource
-import ru.netology.nework.repository.PostRepositorySuspend
 import ru.netology.nework.ui.retrofit.Attachment
 import ru.netology.nework.ui.retrofit.AttachmentType
 import ru.netology.nework.ui.retrofit.MediaUploadResponse
@@ -25,7 +22,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PostRepositoryInServerAndSQL @Inject constructor(
+class PostRepositoryOnServer @Inject constructor(
     private val postsRetrofitSuspendInterface: PostsRetrofitSuspendInterface,
 ) : PostRepositorySuspend {
 

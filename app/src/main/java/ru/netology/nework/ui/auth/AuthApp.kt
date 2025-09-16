@@ -11,6 +11,7 @@ import javax.inject.Singleton
 @Singleton
 class AuthApp @Inject constructor(@ApplicationContext context: Context){
     private val prefs = context.getSharedPreferences("auth", MODE_PRIVATE)
+    private val prefsEditor = prefs.edit()
     private val _authStateFlow: MutableStateFlow<AuthState>
 
     init {
@@ -29,7 +30,7 @@ class AuthApp @Inject constructor(@ApplicationContext context: Context){
     @Synchronized
     fun setAuth(id: Long, token: String) {
         _authStateFlow.value = AuthState(id, token)
-        with(prefs.edit()) {
+        with(prefsEditor) {
             putLong(ID_KEY, id)
             putString(TOKEN_KEY, token)
             apply()
@@ -39,7 +40,7 @@ class AuthApp @Inject constructor(@ApplicationContext context: Context){
     @Synchronized
     fun removeAuth() {
         _authStateFlow.value = AuthState()
-        with(prefs.edit()) {
+        with(prefsEditor) {
             clear()
             commit()
         }

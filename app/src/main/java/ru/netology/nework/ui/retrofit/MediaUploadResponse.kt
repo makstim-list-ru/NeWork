@@ -6,7 +6,7 @@ import java.io.File
 data class MediaUploadResponse(val id: String)
 
 enum class AttachmentType {
-    IMAGE
+    IMAGE, VIDEO, AUDIO
 }
 
 data class PhotoModel(val uri: Uri? = null, val file: File? = null)
