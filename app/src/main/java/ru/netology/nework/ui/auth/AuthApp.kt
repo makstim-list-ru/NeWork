@@ -27,6 +27,7 @@ class AuthApp @Inject constructor(@ApplicationContext context: Context){
 
     val authStateFlow = _authStateFlow.asStateFlow()
 
+
     @Synchronized
     fun setAuth(id: Long, token: String) {
         _authStateFlow.value = AuthState(id, token)
