@@ -85,15 +85,13 @@
             app:layout_constraintTop_toBottomOf="@id/barrier1"
             tools:src="@tools:sample/avatars[7]" />
 
-        <VideoView
+        <androidx.media3.ui.PlayerView
             android:id="@+id/post_media_box_video"
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_marginVertical="4dp"
-            android:adjustViewBounds="true"
             android:contentDescription="Video in post"
-            app:layout_constraintTop_toBottomOf="@id/barrier1"
-            tools:src="@tools:sample/avatars[8]" />
+            app:layout_constraintTop_toBottomOf="@id/barrier1" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrier2"

@@ -4,9 +4,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
-import android.widget.MediaController
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.net.toUri
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -23,7 +23,9 @@ import kotlin.math.pow
 
 enum class KeyPostViewHolder { VIDEO, LIKE, SHARE, POST, REMOVE, EDIT, CANCEL }
 
-class PostsAdapter(private val callback: (Post, KeyPostViewHolder) -> Unit) :
+class PostsAdapter(
+    private val callback: (Post, KeyPostViewHolder) -> Unit
+) :
     PagingDataAdapter<Post, RecyclerView.ViewHolder>(PostDiffUtil) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -112,14 +114,7 @@ class PostViewHolder(
             }
 
             postMediaBoxVideo.setOnClickListener {
-                postMediaBoxVideo.apply {
-                    val mediaController = MediaController(context)
-                    mediaController.setAnchorView(this)
-                    setMediaController(mediaController)
-                    setVideoURI(post.attachment?.url?.toUri())
-                    setOnPreparedListener { start() }
-                    setOnCompletionListener { stopPlayback() }
-                }
+                //todo
             }
 
             postThreeDotsMenu.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
@@ -162,6 +157,9 @@ class PostViewHolder(
 
             Glide.with(postMediaBox).clear(postMediaBox)
             postMediaBox.visibility = View.GONE
+
+            postMediaBoxVideo.player?.release()
+            postMediaBoxVideo.player = null
             postMediaBoxVideo.visibility = View.GONE
 
             post.attachment?.let {
@@ -185,14 +183,14 @@ class PostViewHolder(
 
                             val urlMediaVideo = post.attachment.url
 
-//                            postMediaBoxVideo.apply {
-//                                val mediaController = MediaController(context)
-//                                setMediaController(mediaController)
-//                                setVideoURI(urlMediaVideo.toUri())
-//                                mediaController.show()
-//                                setOnPreparedListener { start() }
-//                                setOnCompletionListener { stopPlayback() }
-//                            }
+                            val player = ExoPlayer.Builder(binding.root.context)
+                                .build()
+                            postMediaBoxVideo.player = player
+                            val mediaItem = MediaItem.fromUri(urlMediaVideo)
+                            player.setMediaItem(mediaItem)
+//                            player.playWhenReady = true
+                            player.volume = 0F
+                            player.prepare()
 
                             postMediaBoxVideo.visibility = View.VISIBLE
                         }
@@ -201,14 +199,14 @@ class PostViewHolder(
 
                             val urlMediaVideo = post.attachment.url
 
-//                            postMediaBoxVideo.apply {
-//                                val mediaController = MediaController(context)
-//                                setMediaController(mediaController)
-//                                setVideoURI(urlMediaVideo.toUri())
-//                                mediaController.show()
-//                                setOnPreparedListener { start() }
-//                                setOnCompletionListener { stopPlayback() }
-//                            }
+                            val player = ExoPlayer.Builder(binding.root.context)
+                                .build()
+                            postMediaBoxVideo.player = player
+                            val mediaItem = MediaItem.fromUri(urlMediaVideo)
+                            player.setMediaItem(mediaItem)
+//                            player.playWhenReady = true
+                            player.volume = 0F
+                            player.prepare()
 
                             postMediaBoxVideo.visibility = View.VISIBLE
                         }

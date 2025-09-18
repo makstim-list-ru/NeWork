@@ -44,7 +44,7 @@ class PostsFragment : Fragment() {
 
         val binding = FragmentPostsBinding.inflate(inflater, container, false)
 
-        val adapter = PostsAdapter ({ post, key ->
+        val adapter = PostsAdapter { post, key ->
             when (key) {
                 KeyPostViewHolder.VIDEO -> {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(post.video))
@@ -79,7 +79,7 @@ class PostsFragment : Fragment() {
 
                 KeyPostViewHolder.CANCEL -> postsViewModel.cancelEditVM()
             }
-        })
+        }
 
         binding.postsContainerRecycleView.adapter = adapter
 
