@@ -14,10 +14,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
@@ -25,8 +31,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentPostsBinding
+import ru.netology.nework.repository.PostRepositoryOnServer
 import ru.netology.nework.ui.auth.AuthApp
 import ru.netology.nework.ui.auth.AuthStateViewModel
+import java.io.IOException
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -42,16 +50,25 @@ class PostsFragment : Fragment() {
     ): View {
         val postsViewModel = ViewModelProvider(this)[PostsViewModel::class.java]
 
+        val authAppStateFlowAsLifeData = authApp.authStateFlow.asLiveData()
+
         val binding = FragmentPostsBinding.inflate(inflater, container, false)
 
-        val adapter = PostsAdapter { post, key ->
+        val adapter = PostsAdapter({ post, key ->
             when (key) {
                 KeyPostViewHolder.VIDEO -> {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(post.video))
                     startActivity(intent)
                 }
 
-                KeyPostViewHolder.LIKE -> postsViewModel.likeVM(post.id)
+                KeyPostViewHolder.LIKE -> {
+                    if (authApp.authenticated) {
+                        postsViewModel.likeVM(post.id)
+                    } else throw IOException(
+                        "ERROR: KeyPostViewHolder.LIKE - unauthorized user likes a post"
+                    )
+                }
+
                 KeyPostViewHolder.SHARE -> {
                     val intent = Intent().apply {
                         putExtra(Intent.EXTRA_TEXT, post.content)
@@ -79,7 +96,7 @@ class PostsFragment : Fragment() {
 
                 KeyPostViewHolder.CANCEL -> postsViewModel.cancelEditVM()
             }
-        }
+        }, authApp)
 
         binding.postsContainerRecycleView.adapter = adapter
 
@@ -89,10 +106,19 @@ class PostsFragment : Fragment() {
             }
         }
 
+        authAppStateFlowAsLifeData.observe(viewLifecycleOwner) {
+            adapter.refresh()
+        }
 
-//        postsViewModel.text.observe(viewLifecycleOwner) {
-//            binding.textHome.text = it
-//        }
+        postsViewModel.dbFlag.observe(viewLifecycleOwner) {
+            when (it) {
+                PostRepositoryOnServer.DbFlagsList.REFRESH_REQUEST -> adapter.refresh()
+                PostRepositoryOnServer.DbFlagsList.ERROR_NETWORK -> throw IOException("ERROR postsViewModel.dbFlag.observe - ERROR_NETWORK")
+                PostRepositoryOnServer.DbFlagsList.NONE -> {}
+            }
+            println("postsViewModel.dbFlag.observe   " + it)
+
+        }
 
         activity?.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

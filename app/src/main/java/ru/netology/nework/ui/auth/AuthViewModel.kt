@@ -14,11 +14,12 @@ class AuthViewModel @Inject constructor(
     private val postsRetrofitSuspendInterface: PostsRetrofitSuspendInterface,
     private val authApp: AuthApp
 ) : ViewModel() {
-    val data = LoginDefault("test", "test")
 
     private val _loginFaultFlag = MutableLiveData<Boolean?>(null)
     val loginFaultFlag: LiveData<Boolean?>
         get() = _loginFaultFlag
+
+    val data = LoginDefault("test", "test") //todo temporary solution
 
     fun loginVM(login: String, pass: String) {
         viewModelScope.launch {

@@ -91,6 +91,17 @@
             android:layout_height="300dp"
             android:layout_marginVertical="4dp"
             android:contentDescription="Video in post"
+            app:shutter_background_color="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/barrier1" />
+
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/post_media_box_audio"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginVertical="4dp"
+            android:contentDescription="Audio in post"
+            app:shutter_background_color="?attr/colorPrimary"
+            app:surface_type="none"
             app:layout_constraintTop_toBottomOf="@id/barrier1" />
 
         <androidx.constraintlayout.widget.Barrier
@@ -98,7 +109,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="post_media_box,post_media_box_video" />
+            app:constraint_referenced_ids="post_media_box,post_media_box_video, post_media_box_audio" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/post_like"

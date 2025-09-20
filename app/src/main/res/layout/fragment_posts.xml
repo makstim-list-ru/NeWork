@@ -11,38 +11,36 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/post_card"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        tools:listitem="@layout/post_card" />
 
-<!--    <TextView-->
-<!--        android:id="@+id/text_home"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginStart="8dp"-->
-<!--        android:layout_marginTop="8dp"-->
-<!--        android:layout_marginEnd="8dp"-->
-<!--        android:textAlignment="center"-->
-<!--        android:textSize="20sp"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/plusButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="120dp"
+        android:contentDescription="PLUS button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/baseline_add_24" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
-<!--<com.google.android.material.appbar.AppBarLayout-->
-<!--android:id="@+id/topAppBarLayout"-->
-<!--android:layout_width="match_parent"-->
-<!--android:layout_height="wrap_content"-->
-<!--app:layout_constraintTop_toTopOf="parent">-->
+    <!--<com.google.android.material.appbar.AppBarLayout-->
+    <!--android:id="@+id/topAppBarLayout"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--app:layout_constraintTop_toTopOf="parent">-->
 
-<!--<com.google.android.material.appbar.MaterialToolbar-->
-<!--    android:id="@+id/topAppBar"-->
-<!--    style="@style/Widget.MaterialComponents.Toolbar.Primary"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="?attr/actionBarSize"-->
-<!--    app:menu="@menu/home_dots_menu" />-->
-<!--</com.google.android.material.appbar.AppBarLayout>-->
+    <!--<com.google.android.material.appbar.MaterialToolbar-->
+    <!--    android:id="@+id/topAppBar"-->
+    <!--    style="@style/Widget.MaterialComponents.Toolbar.Primary"-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="?attr/actionBarSize"-->
+    <!--    app:menu="@menu/home_dots_menu" />-->
+    <!--</com.google.android.material.appbar.AppBarLayout>-->

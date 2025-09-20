@@ -9,6 +9,7 @@ data class Post(
     val content: String = "",
     val likedByMe: Boolean = false,
     val likes: Long = 999,
+    val likeOwnerIds: List<Long>? = null,
     val sharesNum: Long = 99,
     val seenNum: Long = 9_999,
     val video: String = "",

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import ru.netology.nework.repository.PostRepositoryOnServer
 import ru.netology.nework.repository.PostRepositorySuspend
 import ru.netology.nework.ui.auth.AuthApp
 import ru.netology.nework.ui.retrofit.PhotoModel
@@ -35,6 +36,7 @@ class PostsViewModel @Inject constructor(
 //    }
 //    val text: LiveData<String> = _text
 
+    val dbFlag = repository.dbFlag
     private val cached: Flow<PagingData<Post>> = repository.getDataFlow().cachedIn(viewModelScope)
 
     @OptIn(ExperimentalCoroutinesApi::class)

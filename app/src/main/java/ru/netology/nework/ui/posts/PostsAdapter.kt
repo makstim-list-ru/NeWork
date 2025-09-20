@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.URLUtil
+import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import ru.netology.nework.R
 import ru.netology.nework.databinding.PostCardBinding
+import ru.netology.nework.ui.auth.AuthApp
 import ru.netology.nework.ui.retrofit.AttachmentType
 import ru.netology.nework.ui.retrofit.Post
 import java.time.format.DateTimeFormatter
@@ -24,14 +26,16 @@ import kotlin.math.pow
 enum class KeyPostViewHolder { VIDEO, LIKE, SHARE, POST, REMOVE, EDIT, CANCEL }
 
 class PostsAdapter(
-    private val callback: (Post, KeyPostViewHolder) -> Unit
+    private val callback: (Post, KeyPostViewHolder) -> Unit,
+    private val authApp: AuthApp
 ) :
     PagingDataAdapter<Post, RecyclerView.ViewHolder>(PostDiffUtil) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
         val binding = PostCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(binding, callback)
+
+        return PostViewHolder(binding, callback, authApp)
     }
 
     override fun getItemViewType(position: Int) = R.layout.post_card
@@ -61,7 +65,8 @@ object PostDiffUtil : DiffUtil.ItemCallback<Post>() {
 
 class PostViewHolder(
     private val binding: PostCardBinding,
-    private val callback: (Post, KeyPostViewHolder) -> Unit
+    private val callback: (Post, KeyPostViewHolder) -> Unit,
+    private val authApp: AuthApp
 ) :
     RecyclerView.ViewHolder(binding.root) {
     fun onBindPost(post: Post) {
@@ -86,14 +91,24 @@ class PostViewHolder(
             postPublished.text = getFormattedDateTime(post.published)
             postContent.text = post.content
 
-            postLike.text = getFormatedNumber(post.likes)
+            val numLikes = post.likeOwnerIds?.size?.toLong() ?: 0L
+            postLike.text = getFormatedNumber(numLikes)
             postLike.isChecked = post.likedByMe
 
-            postShare.text = getFormatedNumber(post.sharesNum)
+            postShare.text = "" //getFormatedNumber(post.sharesNum)
+
             postViewsNumber.text = getFormatedNumber(post.seenNum)
 
             postLike.setOnClickListener {
-                callback(post, KeyPostViewHolder.LIKE)
+                if (!authApp.authenticated) {
+                    postLike.isChecked = false
+                    Toast.makeText(
+                        postLike.context,
+                        "You need to be authorized to LIKE posts. Please, authorize...",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else
+                    callback(post, KeyPostViewHolder.LIKE)
             }
 
             postShare.setOnClickListener {
@@ -162,6 +177,10 @@ class PostViewHolder(
             postMediaBoxVideo.player = null
             postMediaBoxVideo.visibility = View.GONE
 
+            postMediaBoxAudio.player?.release()
+            postMediaBoxAudio.player = null
+            postMediaBoxAudio.visibility = View.GONE
+
             post.attachment?.let {
                 if (URLUtil.isValidUrl(post.attachment.url))
                     when (post.attachment.type) {
@@ -183,13 +202,13 @@ class PostViewHolder(
 
                             val urlMediaVideo = post.attachment.url
 
-                            val player = ExoPlayer.Builder(binding.root.context)
+                            val player = ExoPlayer.Builder(postMediaBoxVideo.context)
                                 .build()
                             postMediaBoxVideo.player = player
                             val mediaItem = MediaItem.fromUri(urlMediaVideo)
                             player.setMediaItem(mediaItem)
 //                            player.playWhenReady = true
-                            player.volume = 0F
+//                            player.volume = 0F
                             player.prepare()
 
                             postMediaBoxVideo.visibility = View.VISIBLE
@@ -199,16 +218,16 @@ class PostViewHolder(
 
                             val urlMediaVideo = post.attachment.url
 
-                            val player = ExoPlayer.Builder(binding.root.context)
+                            val player = ExoPlayer.Builder(postMediaBoxAudio.context)
                                 .build()
-                            postMediaBoxVideo.player = player
+                            postMediaBoxAudio.player = player
                             val mediaItem = MediaItem.fromUri(urlMediaVideo)
                             player.setMediaItem(mediaItem)
 //                            player.playWhenReady = true
-                            player.volume = 0F
+//                            player.volume = 0F
                             player.prepare()
 
-                            postMediaBoxVideo.visibility = View.VISIBLE
+                            postMediaBoxAudio.visibility = View.VISIBLE
                         }
                     }
             }

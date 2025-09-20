@@ -35,6 +35,10 @@ class PostRepositoryOnServer @Inject constructor(
         pagingSourceFactory = { PostPagingSource(postsRetrofitSuspendInterface) },
     ).flow
 
+    private val _dbFlag = MutableLiveData<DbFlagsList>(DbFlagsList.NONE)
+    override val dbFlag: LiveData<DbFlagsList>
+        get() = _dbFlag
+
 
     private val dataLive: LiveData<PagingData<Post>> = dataFlow.asLiveData(Dispatchers.Default)
 
@@ -45,7 +49,7 @@ class PostRepositoryOnServer @Inject constructor(
 
     override fun getDataFlow(): Flow<PagingData<Post>> = dataFlow
 
-    override suspend fun shareByID(id: Long) = Unit//todo dao.shareByID(id)
+    override suspend fun shareByID(id: Long) = Unit //Nothing to do in this release
 
     override suspend fun removeByID(id: Long) {
         //TODO dao.removeByID(id)
@@ -104,7 +108,7 @@ class PostRepositoryOnServer @Inject constructor(
                     println("save(post: Post)->retrofitService.save(myPost) ERROR: $e")
                     return
                 }
-                        //TODO tempId = dao.getMinId()?.coerceAtMost(0)?.dec() ?: -1
+                //TODO tempId = dao.getMinId()?.coerceAtMost(0)?.dec() ?: -1
 
             }
 
@@ -138,16 +142,17 @@ class PostRepositoryOnServer @Inject constructor(
     }
 
     override suspend fun likeByID(id: Long) {
-        //todo dao.likeByID(id)
-        val post = Post()//todo dao.getPostById(id).toPostFromEntity()
-
         try {
-            if (post.likedByMe) postsRetrofitSuspendInterface.likeById(id)
-            else postsRetrofitSuspendInterface.dislikeById(id)
+            val post = postsRetrofitSuspendInterface.getById(id)
+            if (post.likedByMe) postsRetrofitSuspendInterface.dislikeById(id)
+            else postsRetrofitSuspendInterface.likeById(id)
+            _dbFlag.value = DbFlagsList.REFRESH_REQUEST
+            _dbFlag.value = DbFlagsList.NONE
         } catch (e: Exception) {
             //todo dao.likeByID(id)
-            servStat.postValue(serverStatus(ServerStatus.ERROR))
-            println("likeByID(id: Long)->PostsRetrofitSuspend.retrofitService.likeById(id) ERROR: $e")
+//            servStat.postValue(serverStatus(ServerStatus.ERROR))
+//            println("likeByID(id: Long)->PostsRetrofitSuspend.retrofitService.likeById(id) ERROR: $e")
+            throw e
         }
     }
 
@@ -249,6 +254,10 @@ class PostRepositoryOnServer @Inject constructor(
 
     private enum class ServerStatus {
         LOADING, ERROR, EMPTY, REFRESHING, OK
+    }
+
+    enum class DbFlagsList {
+        REFRESH_REQUEST, ERROR_NETWORK, NONE
     }
 
 
