@@ -155,6 +155,8 @@ class PostViewHolder(
                 pum.show()
             }
 
+            Glide.with(postAvatar).clear(postAvatar)
+            binding.postAvatar.visibility = View.INVISIBLE
             val url = post.authorAvatar
             url?.let {
                 binding.postAvatar.visibility = View.VISIBLE
@@ -165,9 +167,6 @@ class PostViewHolder(
                     .error(R.drawable.ic_error_100dp)
                     .timeout(10_000)
                     .into(binding.postAvatar)
-            } ?: {
-                Glide.with(postAvatar).clear(postAvatar)
-                binding.postAvatar.visibility = View.INVISIBLE
             }
 
             Glide.with(postMediaBox).clear(postMediaBox)

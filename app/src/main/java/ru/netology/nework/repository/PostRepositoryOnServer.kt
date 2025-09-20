@@ -17,6 +17,7 @@ import ru.netology.nework.ui.retrofit.AttachmentType
 import ru.netology.nework.ui.retrofit.MediaUploadResponse
 import ru.netology.nework.ui.retrofit.Post
 import ru.netology.nework.ui.retrofit.PostsRetrofitSuspendInterface
+import ru.netology.nework.ui.retrofit.User
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,6 +36,11 @@ class PostRepositoryOnServer @Inject constructor(
         pagingSourceFactory = { PostPagingSource(postsRetrofitSuspendInterface) },
     ).flow
 
+    private val usersDataFlow: Flow<PagingData<User>> = Pager(
+        config = PagingConfig(pageSize = 10, enablePlaceholders = true),
+        pagingSourceFactory = { UserPagingSource(postsRetrofitSuspendInterface) },
+    ).flow
+
     private val _dbFlag = MutableLiveData<DbFlagsList>(DbFlagsList.NONE)
     override val dbFlag: LiveData<DbFlagsList>
         get() = _dbFlag
@@ -48,6 +54,7 @@ class PostRepositoryOnServer @Inject constructor(
     override fun getData(): LiveData<PagingData<Post>> = dataLive
 
     override fun getDataFlow(): Flow<PagingData<Post>> = dataFlow
+    override fun getUsersDataFlow(): Flow<PagingData<User>> = usersDataFlow
 
     override suspend fun shareByID(id: Long) = Unit //Nothing to do in this release
 

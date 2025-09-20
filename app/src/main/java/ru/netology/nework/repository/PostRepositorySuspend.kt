@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import ru.netology.nework.repository.PostRepositoryOnServer.DbFlagsList
 import ru.netology.nework.ui.retrofit.MediaUploadResponse
 import ru.netology.nework.ui.retrofit.Post
+import ru.netology.nework.ui.retrofit.User
 import java.io.File
 
 interface PostRepositorySuspend {
@@ -20,5 +21,6 @@ interface PostRepositorySuspend {
 //    fun getServStat(): LiveData<FeedModel>
     fun getData(): LiveData<PagingData<Post>>
     fun getDataFlow(): Flow<PagingData<Post>>
+    fun getUsersDataFlow(): Flow<PagingData<User>>
 
 }

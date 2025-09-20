@@ -1,13 +1,19 @@
 package ru.netology.nework.ui.users
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import ru.netology.nework.repository.PostRepositorySuspend
+import ru.netology.nework.ui.retrofit.User
+import javax.inject.Inject
 
-class UsersViewModel : ViewModel() {
+@HiltViewModel
+class UsersViewModel @Inject constructor(
+    private val repository: PostRepositorySuspend,
+) : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is notifications Fragment"
-    }
-    val text: LiveData<String> = _text
+    val data: Flow<PagingData<User>> = repository.getUsersDataFlow().cachedIn(viewModelScope)
 }

@@ -22,6 +22,9 @@ interface PostsRetrofitSuspendInterface {
     @GET("posts/latest")
     suspend fun getLatest(@Query("count") count :Int): Response<List<Post>>
 
+    @GET("users")
+    suspend fun getUsers(): Response<List<User>>
+
     @GET("posts/{id}")
     suspend fun getById(@Path("id") id: Long): Post
 
