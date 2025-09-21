@@ -97,6 +97,10 @@ class PostsFragment : Fragment() {
         binding.postsContainerRecycleView.adapter = adapter
         binding.plusButton.isVisible = authApp.authenticated
 
+        binding.plusButton.setOnClickListener {
+            findNavController().navigate(R.id.action_navigation_home_to_postsEditorFragment)
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 postsViewModel.data.collectLatest { adapter.submitData(it) }
@@ -117,6 +121,7 @@ class PostsFragment : Fragment() {
             println("postsViewModel.dbFlag.observe   " + it)
 
         }
+
 
         activity?.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

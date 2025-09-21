@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_navigation_home_to_navigation_auth"
             app:destination="@id/navigation_auth" />
+        <action
+            android:id="@+id/action_navigation_home_to_postsEditorFragment"
+            app:destination="@id/postsEditorFragment" />
     </fragment>
 
     <fragment
@@ -32,5 +35,10 @@
         android:name="ru.netology.nework.ui.auth.AuthFragment"
         android:label="AuthFragment"
         tools:layout="@layout/fragment_auth"/>
+    <fragment
+        android:id="@+id/postsEditorFragment"
+        android:name="ru.netology.nework.ui.posts.PostsEditorFragment"
+        android:label="NEW Post"
+        tools:layout="@layout/fragment_posts_editor" />
 
 </navigation>

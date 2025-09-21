@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="32dp"
+    tools:context=".ui.posts.PostsEditorFragment">
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonPanel"
+        android:layout_alignParentTop="true"
+        android:paddingTop="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="8dp">
+
+            <EditText
+                android:id="@+id/content2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:inputType="textMultiLine"
+                android:padding="16dp"
+                tools:text="@tools:sample/lorem[10]" />
+
+            <FrameLayout
+                android:id="@+id/photoContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/photo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="description_photo"
+                    tools:src="@tools:sample/avatars[7]" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/removePhoto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal|bottom"
+                    android:text="Remove" />
+            </FrameLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/buttonPanel"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
+        android:layout_weight="0"
+        android:background="?colorPrimary"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/make_photo"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="select_photo"
+            android:padding="12dp"
+            app:icon="@drawable/baseline_add_a_photo_24"
+            app:iconTint="?colorOnPrimary"
+            app:iconSize="28dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/choose_photo"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="take_photo"
+            android:padding="12dp"
+            app:icon="@drawable/baseline_add_photo_alternate_24"
+            app:iconTint="?colorOnPrimary"
+            app:iconSize="28dp"/>
+    </LinearLayout>
+
+</RelativeLayout>
+
+
+    <!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--    xmlns:tools="http://schemas.android.com/tools"-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="match_parent"-->
+    <!--    tools:context=".ui.posts.PostsEditorFragment">-->
+
+    <!--    &lt;!&ndash; TODO: Update blank fragment layout &ndash;&gt;-->
+    <!--    <TextView-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:text="@string/hello_blank_fragment" />-->
+
+    <!--</FrameLayout>-->
