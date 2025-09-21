@@ -20,6 +20,7 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
@@ -83,11 +84,16 @@ class PostsFragment : Fragment() {
                 }
 
                 KeyPostViewHolder.REMOVE -> postsViewModel.removeVM(post.id)
+
                 KeyPostViewHolder.EDIT -> {
-//                    findNavController().navigate(
-//                        R.id.action_mainFragment_to_editorFragment,
-//                        Bundle().apply { this.putString("TEXT_TRANSFER", post.id.toString()) })
-//                    postsViewModel.editVM(post)
+                    val gson = Gson()
+                    val bundle = Bundle()
+                    bundle.putSerializable("post_to_postEditor", gson.toJson(post))
+                    findNavController().navigate(
+                        R.id.action_navigation_home_to_postsEditorFragment,
+                        bundle
+                    )
+                    postsViewModel.editVM(post)
                 }
 
                 KeyPostViewHolder.CANCEL -> postsViewModel.cancelEditVM()

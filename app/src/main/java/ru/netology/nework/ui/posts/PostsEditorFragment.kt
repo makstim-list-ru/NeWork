@@ -1,7 +1,6 @@
 package ru.netology.nework.ui.posts
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -14,39 +13,20 @@ import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.github.dhaval2404.imagepicker.ImagePicker
-import ru.netology.nework.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentPostsEditorBinding
 import ru.netology.nework.ui.retrofit.Post
 import java.io.File
-import kotlin.getValue
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [PostsEditorFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class PostsEditorFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,10 +41,14 @@ class PostsEditorFragment : Fragment() {
         val binding = FragmentPostsEditorBinding.inflate(inflater, container, false)
         val viewModel by activityViewModels<PostsViewModel>()
 
-        val postID = arguments?.getString("TEXT_TRANSFER")?.toLong()
-        val post: Post? =
-            null //TODO postID?.let { viewModel.data.asLiveData(Dispatchers.Default).value?.filter { it.id == postID }?.get(0) }
-        val urlPost = post?.let { "http://10.0.2.2:9999/media/${post.attachment?.url}" }
+        val post: Post? = arguments?.let {
+            val gson = Gson()
+            val token = TypeToken.getParameterized(Post::class.java).type
+            val string = it.getString("post_to_postEditor")
+            if (!string.isNullOrBlank()) gson.fromJson(string, token) else null
+        }
+
+        val urlPost = post?.attachment?.url
 
         val photoIntentLauncher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { activityResult ->
@@ -85,8 +69,6 @@ class PostsEditorFragment : Fragment() {
 
         binding.content2.setText(post?.content)
         binding.content2.requestFocus()
-
-        //binding.content2.setText(arguments?.getString("TEXT_TRANSFER"))
 
         viewModel.photoLive.observe(viewLifecycleOwner) { photo ->
             if (photo == null) {
@@ -177,29 +159,5 @@ class PostsEditorFragment : Fragment() {
         }, viewLifecycleOwner)
 
         return binding.root
-
-
-//        // Inflate the layout for this fragment
-//        return inflater.inflate(R.layout.fragment_posts_editor, container, false)
-    }
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment PostsEditorFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            PostsEditorFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
     }
 }
