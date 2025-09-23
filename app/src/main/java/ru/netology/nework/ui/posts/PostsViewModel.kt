@@ -16,12 +16,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import ru.netology.nework.repository.PostRepositoryOnServer
 import ru.netology.nework.repository.PostRepositorySuspend
 import ru.netology.nework.ui.auth.AuthApp
 import ru.netology.nework.ui.retrofit.PhotoModel
 import ru.netology.nework.ui.retrofit.Post
-import ru.netology.nework.ui.retrofit.postEmpty
+import ru.netology.nework.ui.retrofit.postByDefault
 import java.io.File
 import javax.inject.Inject
 
@@ -30,11 +29,6 @@ class PostsViewModel @Inject constructor(
     private val repository: PostRepositorySuspend,
     authApp: AuthApp
 ) : ViewModel() {
-
-//    private val _text = MutableLiveData<String>().apply {
-//        value = "This is home Fragment"
-//    }
-//    val text: LiveData<String> = _text
 
     val dbFlag = repository.dbFlag
     private val cached: Flow<PagingData<Post>> = repository.getDataFlow().cachedIn(viewModelScope)
@@ -50,7 +44,8 @@ class PostsViewModel @Inject constructor(
         }.flowOn(Dispatchers.Default)
 
 
-    private val editedPostTmp = MutableLiveData(postEmpty)
+    private val editedPostTmp = MutableLiveData(postByDefault)
+
     private val _photoLive = MutableLiveData<PhotoModel?>(null)
     val photoLive: LiveData<PhotoModel?>
         get() = _photoLive
@@ -68,26 +63,17 @@ class PostsViewModel @Inject constructor(
     }
 
     fun saveVM(content: String) {
-//        val editedPost = editedPostTmp.value?.copy()!!
-        val editedPost = requireNotNull(editedPostTmp.value) { println("ERROR in <saveViewModel>") }
 
-        if (editedPost.id == 0L) { //SAVE NEW
-            viewModelScope.launch {
-                repository.save(
-                    Post(content = content),
-                    photoLive.value?.file
-                )
-            }
-        } else { //EDIT
-            viewModelScope.launch {
-                repository.edit(
-                    editedPost.copy(content = content),
-                    photoLive.value?.file
-                )
-            }
+        val editedPost = requireNotNull(editedPostTmp.value)
+
+        viewModelScope.launch {
+            repository.saveNewOrOld(
+                editedPost.copy(content = content),
+                photoLive.value?.file
+            )
         }
+
         cancelEditVM()
-        removePhotoVM()
     }
 
     fun editVM(post: Post) {
@@ -95,7 +81,8 @@ class PostsViewModel @Inject constructor(
     }
 
     fun cancelEditVM() {
-        editedPostTmp.value = postEmpty
+        editedPostTmp.value = postByDefault
+        removePhotoVM()
     }
 
     fun loadAllPostsVM() {

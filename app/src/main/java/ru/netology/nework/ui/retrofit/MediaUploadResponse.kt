@@ -3,7 +3,7 @@ package ru.netology.nework.ui.retrofit
 import android.net.Uri
 import java.io.File
 
-data class MediaUploadResponse(val id: String)
+data class MediaUploadResponse(val url: String)
 
 enum class AttachmentType {
     IMAGE, VIDEO, AUDIO

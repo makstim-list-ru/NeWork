@@ -1,19 +1,20 @@
 package ru.netology.nework.ui.retrofit
 
 data class Post(
-    val id: Long = 0,
-    val authorId: Long = 0,
-    val author: String = "",
-    val authorAvatar: String? = "",
-    val published: String = "",
-    val content: String = "",
-    val likedByMe: Boolean = false,
-    val likes: Long = 999,
-    val likeOwnerIds: List<Long>? = null,
-    val sharesNum: Long = 99,
-    val seenNum: Long = 9_999,
+    val id: Long = 0,               //*
+    val authorId: Long = 0,         //*
+    val author: String = "",        //*
+    val authorJob: String? = null,
+    val authorAvatar: String? = null,
+    val content: String = "",       //*
+    val published: String = "1970-01-01T00:00:00.000Z",     //*
+    val mentionIds: List<Long> = emptyList(),   //*
+    val mentionedMe: Boolean = false,           //*
+    val likeOwnerIds: List<Long> = emptyList(),  //*
+    val likedByMe: Boolean = false, //*
     val video: String = "",
     val attachment: Attachment? = null,
+    val users: Map<Long, UserPreview> = emptyMap(),   //*
     val ownedByMe: Boolean = false,
 )
 
@@ -22,21 +23,12 @@ data class Attachment(
     val type: AttachmentType,
 )
 
-val postEmpty = Post(
-    id = 0,
-    authorId = 0,
-    author = "",
-    authorAvatar = "",
-    published = "",
-    content = "",
-    likedByMe = false,
-    likes = 0,
-    sharesNum = 0,
-    seenNum = 0,
-    video = "",
-    attachment = null,
-    ownedByMe = false,
+data class UserPreview(
+    val name: String = "",
+    val avatar: String? = null,
 )
+
+val postByDefault = Post()
 
 
 

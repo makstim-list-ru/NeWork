@@ -10,7 +10,7 @@
     tools:context=".ui.posts.PostsEditorFragment">
 
     <ScrollView
-        android:id="@+id/scrollView"
+        android:id="@+id/scroll_view_post_editor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/buttonPanel"
@@ -24,7 +24,7 @@
             android:paddingBottom="8dp">
 
             <EditText
-                android:id="@+id/content2"
+                android:id="@+id/content_post"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
@@ -33,12 +33,12 @@
                 tools:text="@tools:sample/lorem[10]" />
 
             <FrameLayout
-                android:id="@+id/photoContainer"
+                android:id="@+id/media_container_post"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <ImageView
-                    android:id="@+id/photo"
+                    android:id="@+id/image_post"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
@@ -47,7 +47,7 @@
                     tools:src="@tools:sample/avatars[7]" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/removePhoto"
+                    android:id="@+id/remove_image_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal|bottom"

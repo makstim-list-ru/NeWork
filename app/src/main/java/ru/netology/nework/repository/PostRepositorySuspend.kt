@@ -14,8 +14,7 @@ interface PostRepositorySuspend {
     suspend fun likeByID(id: Long)
     suspend fun shareByID(id: Long)
     suspend fun removeByID(id: Long)
-    suspend fun save(post: Post, uploadFile: File? = null)
-    suspend fun edit(post: Post, uploadFile: File? = null)
+    suspend fun saveNewOrOld(post: Post, uploadFile: File? = null)
     suspend fun loadNewer()
     suspend fun upload(file: File): MediaUploadResponse?
 //    fun getServStat(): LiveData<FeedModel>

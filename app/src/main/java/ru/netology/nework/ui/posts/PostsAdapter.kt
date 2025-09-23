@@ -91,13 +91,13 @@ class PostViewHolder(
             postPublished.text = getFormattedDateTime(post.published)
             postContent.text = post.content
 
-            val numLikes = post.likeOwnerIds?.size?.toLong() ?: 0L
+            val numLikes = post.likeOwnerIds.size.toLong()
             postLike.text = getFormatedNumber(numLikes)
             postLike.isChecked = post.likedByMe
 
             postShare.text = "" //getFormatedNumber(post.sharesNum)
 
-            postViewsNumber.text = getFormatedNumber(post.seenNum)
+            postViewsNumber.text = "" //getFormatedNumber(post.seenNum)
 
             postLike.setOnClickListener {
                 if (!authApp.authenticated) {

@@ -68,84 +68,32 @@ class PostRepositoryOnServer @Inject constructor(
         }
     }
 
-    override suspend fun edit(post: Post, uploadFile: File?) {
+    override suspend fun saveNewOrOld(post: Post, uploadFile: File?) {
 
         var responseUpload: MediaUploadResponse? = null
 
-        if (uploadFile != null) try {
-            responseUpload = upload(uploadFile) ?: let {
-                println("save(post: Post, file: File)->FAULT upload file failure")
+        if (uploadFile != null)
+            try {
+                responseUpload = upload(uploadFile) ?: let {
+                    println("save(post: Post, file: File)->FAULT upload file failure")
+                    return
+                }
+            } catch (e: Exception) {
+                println("save(post: Post)->retrofitService.save(myPost) ERROR: $e")
                 return
             }
-        } catch (e: Exception) {
-            println("save(post: Post)->retrofitService.save(myPost) ERROR: $e")
-            return
-        }
 
         val post =
-            post.copy(attachment = responseUpload?.let { Attachment(it.id, AttachmentType.IMAGE) })
-
-//TODO        dao.edit(PostEntity.fromPostToEntity(post))
+            post.copy(attachment = responseUpload?.let { Attachment(it.url, AttachmentType.IMAGE) })
 
         try {
             postsRetrofitSuspendInterface.save(post)
+            _dbFlag.value = DbFlagsList.REFRESH_REQUEST
+            _dbFlag.value = DbFlagsList.NONE
         } catch (e: Exception) {
             servStat.postValue(serverStatus(ServerStatus.ERROR))
             println("edit(post: Post)->retrofitService.save(postWithAtt) ERROR: $e")
         }
-    }
-
-    override suspend fun save(post: Post, uploadFile: File?) {
-
-        var responseUpload: MediaUploadResponse? = null
-        val tempId: Long
-
-        when {
-            post.id > 0L -> {
-                throw Exception("ERROR in save(post: Post, uploadFile: File?)")
-            }
-
-            post.id == 0L -> {
-                if (uploadFile != null) try {
-                    responseUpload = upload(uploadFile) ?: let {
-                        println("save(post: Post, file: File)->FAULT upload file failure")
-                        return
-                    }
-                } catch (e: Exception) {
-                    println("save(post: Post)->retrofitService.save(myPost) ERROR: $e")
-                    return
-                }
-                //TODO tempId = dao.getMinId()?.coerceAtMost(0)?.dec() ?: -1
-
-            }
-
-            else -> { // post.id<0L
-                tempId = post.id
-            }
-        }
-
-//        ++++++++++++++++++++++
-//        tempId = if (post.id == 0L) dao.getMinId()?.coerceAtMost(0)?.dec() ?: -1 else post.id
-//todo
-
-//        val tempPost = post.copy(
-//            id = tempId,
-//            author = "Me",
-//            authorAvatar = "sber.jpg",
-//            attachment = responseUpload?.let { Attachment(it.id, AttachmentType.IMAGE) })
-//
-//        if (post.id == 0L) dao.save(    // если сохраняется свежий пост с присвоением нового (-)id в ЛБД
-//            PostEntity.fromPostToEntity(tempPost)
-//        )
-//
-//        try {
-//            val serverPost = postsRetrofitSuspendInterface.save(tempPost.copy(id = 0L))
-//            dao.save(PostEntity.fromPostToEntity(serverPost))
-//            dao.removeByID(tempId)
-//        } catch (e: Exception) {
-//            servStat.postValue(serverStatus(ServerStatus.ERROR))
-//            println("save(post: Post)->retrofitService.save(myPost) ERROR: $e")
-//        }
     }
 
     override suspend fun likeByID(id: Long) {

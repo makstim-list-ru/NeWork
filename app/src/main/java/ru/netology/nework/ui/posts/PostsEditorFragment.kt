@@ -67,28 +67,28 @@ class PostsEditorFragment : Fragment() {
             )
         }
 
-        binding.content2.setText(post?.content)
-        binding.content2.requestFocus()
+        binding.contentPost.setText(post?.content)
+        binding.contentPost.requestFocus()
 
         viewModel.photoLive.observe(viewLifecycleOwner) { photo ->
             if (photo == null) {
-                binding.photoContainer.isVisible = false
+                binding.mediaContainerPost.isVisible = false
                 return@observe
             } else {
-                binding.photoContainer.isVisible = true
+                binding.mediaContainerPost.isVisible = true
             }
 
             val url = viewModel.photoLive.value?.uri
-            Glide.with(binding.photo)
+            Glide.with(binding.imagePost)
                 .load(url)
                 .circleCrop()
                 .placeholder(R.drawable.ic_loading_100dp)
                 .error(R.drawable.ic_error_100dp)
                 .timeout(10_000)
-                .into(binding.photo)
+                .into(binding.imagePost)
         }
 
-        binding.removePhoto.setOnClickListener {
+        binding.removeImageButton.setOnClickListener {
             viewModel.removePhotoVM()
         }
 
@@ -135,12 +135,11 @@ class PostsEditorFragment : Fragment() {
                 println("INFO toolbarEditor item selected $menuItem")
                 when (menuItem.itemId) {
                     R.id.saveInToolbarEditor -> {
-                        val text = binding.content2.text.toString()
+                        val text = binding.contentPost.text.toString()
                         if (text.isNotBlank()) {
                             viewModel.saveVM(text)
                         } else {
                             viewModel.cancelEditVM()
-                            viewModel.removePhotoVM()
                         }
                         findNavController().navigateUp()
                         return true
@@ -148,7 +147,6 @@ class PostsEditorFragment : Fragment() {
 
                     R.id.homeInToolBarEditor -> {
                         viewModel.cancelEditVM()
-                        viewModel.removePhotoVM()
                         findNavController().navigateUp()
                         return true
                     }
