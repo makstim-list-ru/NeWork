@@ -81,7 +81,7 @@ class PostsEditorFragment : Fragment() {
             val url = viewModel.photoLive.value?.uri
             Glide.with(binding.imagePost)
                 .load(url)
-                .circleCrop()
+//                .circleCrop()
                 .placeholder(R.drawable.ic_loading_100dp)
                 .error(R.drawable.ic_error_100dp)
                 .timeout(10_000)

@@ -121,10 +121,11 @@ class PostsFragment : Fragment() {
         postsViewModel.dbFlag.observe(viewLifecycleOwner) {
             when (it) {
                 PostRepositoryOnServer.DbFlagsList.REFRESH_REQUEST -> adapter.refresh()
-                PostRepositoryOnServer.DbFlagsList.ERROR_NETWORK -> throw IOException("ERROR postsViewModel.dbFlag.observe - ERROR_NETWORK")
+                PostRepositoryOnServer.DbFlagsList.ERROR_NETWORK ->
+                    throw IOException("ERROR postsViewModel.dbFlag.observe - ERROR_NETWORK")
                 PostRepositoryOnServer.DbFlagsList.NONE -> {}
             }
-            println("postsViewModel.dbFlag.observe   " + it)
+            println("postsViewModel.dbFlag.observe   $it")
 
         }
 
@@ -152,9 +153,9 @@ class PostsFragment : Fragment() {
                         true
                     }
 
-                    R.id.signme -> {
+                    R.id.regme -> {
                         // TODO: just hardcode it, implementation must be in homework
-                        authApp.setAuth(5, "x-token")
+                        findNavController().navigate(R.id.action_navigation_home_to_navigation_auth_reg)
                         true
                     }
 

@@ -7,8 +7,8 @@
             android:title="Login"
             app:showAsAction="never" />
         <item
-            android:id="@+id/signme"
-            android:title="Log me"
+            android:id="@+id/regme"
+            android:title="Registration"
             app:showAsAction="never" />
     </group>
     <group android:id="@+id/authenticated">

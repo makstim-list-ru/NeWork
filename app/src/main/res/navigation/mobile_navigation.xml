@@ -9,13 +9,16 @@
         android:id="@+id/navigation_home"
         android:name="ru.netology.nework.ui.posts.PostsFragment"
         android:label="@string/title_posts"
-        tools:layout="@layout/fragment_posts" >
+        tools:layout="@layout/fragment_posts">
         <action
             android:id="@+id/action_navigation_home_to_navigation_auth"
             app:destination="@id/navigation_auth" />
         <action
             android:id="@+id/action_navigation_home_to_postsEditorFragment"
             app:destination="@id/postsEditorFragment" />
+        <action
+            android:id="@+id/action_navigation_home_to_navigation_auth_reg"
+            app:destination="@id/navigation_auth_reg" />
     </fragment>
 
     <fragment
@@ -34,11 +37,16 @@
         android:id="@+id/navigation_auth"
         android:name="ru.netology.nework.ui.auth.AuthFragment"
         android:label="AuthFragment"
-        tools:layout="@layout/fragment_auth"/>
+        tools:layout="@layout/fragment_auth" />
     <fragment
         android:id="@+id/postsEditorFragment"
         android:name="ru.netology.nework.ui.posts.PostsEditorFragment"
         android:label="NEW Post"
         tools:layout="@layout/fragment_posts_editor" />
+    <fragment
+        android:id="@+id/navigation_auth_reg"
+        android:name="ru.netology.nework.ui.auth.AuthRegFragment"
+        android:label="Registration"
+        tools:layout="@layout/fragment_auth_reg"/>
 
 </navigation>
