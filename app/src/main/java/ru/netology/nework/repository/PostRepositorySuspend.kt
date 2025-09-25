@@ -16,7 +16,7 @@ interface PostRepositorySuspend {
     suspend fun removeByID(id: Long)
     suspend fun saveNewOrOld(post: Post, uploadFile: File? = null)
     suspend fun loadNewer()
-    suspend fun upload(file: File): MediaUploadResponse?
+    suspend fun uploadMedia(file: File): MediaUploadResponse?
 //    fun getServStat(): LiveData<FeedModel>
     fun getData(): LiveData<PagingData<Post>>
     fun getDataFlow(): Flow<PagingData<Post>>

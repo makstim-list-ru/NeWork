@@ -1,12 +1,19 @@
 package ru.netology.nework.ui.auth
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import ru.netology.nework.ui.retrofit.PhotoModel
 import ru.netology.nework.ui.retrofit.PostsRetrofitSuspendInterface
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -15,17 +22,26 @@ class AuthViewModel @Inject constructor(
     private val authApp: AuthApp
 ) : ViewModel() {
 
+    private val _photoLive = MutableLiveData<PhotoModel?>(null)
+    val photoLive: LiveData<PhotoModel?>
+        get() = _photoLive
+
     private val _loginFaultFlag = MutableLiveData<Boolean?>(null)
     val loginFaultFlag: LiveData<Boolean?>
         get() = _loginFaultFlag
 
-    private val _loginRegFaultFlag = MutableLiveData<Boolean?>(null)
-    val loginRegFaultFlag: LiveData<Boolean?>
+    private val _loginRegFaultFlag = MutableLiveData<Int?>(null)
+    val loginRegFaultFlag: LiveData<Int?>
         get() = _loginRegFaultFlag
 
     val data = LoginDefault("test", "test") //todo temporary solution
     val dataRegistration =
-        LoginRegistrationDefault("test", "test", "test", "Maks Timm") //todo temporary solution
+        LoginRegistrationDefault(
+            "test",
+            "test",
+            "test",
+            "Maks Timm",
+        ) //todo temporary solution
 
     fun loginVM(login: String, pass: String) {
         viewModelScope.launch {
@@ -35,13 +51,11 @@ class AuthViewModel @Inject constructor(
 
     fun loginRegVM(
         login: String,
+        pass: String,
         fullName: String,
-        password: String,
-        passwordConfirmation: String
     ) {
         viewModelScope.launch {
-            _loginRegFaultFlag.value =
-                (loginReg(login, fullName, password, passwordConfirmation) == null)
+            loginReg(login, pass, fullName)
         }
     }
 
@@ -65,23 +79,47 @@ class AuthViewModel @Inject constructor(
         return response.body()
     }
 
-    private suspend fun loginReg(login: String, fullName: String, pass: String, passConf: String): AuthUploadResponse? {
-        val response = postsRetrofitSuspendInterface.updateUser(login, pass)
-        if (!response.isSuccessful) {
-            println("login->response.isSuccessful ERROR: if-else")
-            return null
+    private suspend fun loginReg(
+        login: String,
+        pass: String,
+        fullName: String,
+    ) {
+
+        val file = photoLive.value?.file
+        val media = file?.let {
+            MultipartBody.Part.createFormData(
+                "file", file.name, file.asRequestBody()
+            )
         }
-        val authUploadResponse = requireNotNull(response.body())
-        println(authUploadResponse)
-        authApp.setAuth(id = authUploadResponse.id, token = authUploadResponse.token)
-        return response.body()
+
+        val mediaType = "text/plain; charset=utf-8".toMediaType()
+        val response = postsRetrofitSuspendInterface.registerUser(
+            login.toRequestBody(mediaType),
+            pass.toRequestBody(mediaType),
+            fullName.toRequestBody(mediaType),
+            media
+        )
+        if (response.isSuccessful) {
+            val authUploadResponse = requireNotNull(response.body())
+            authApp.setAuth(id = authUploadResponse.id, token = authUploadResponse.token)
+        }
+        _loginRegFaultFlag.value = response.code()
     }
+
+    fun changePhotoVM(uri: Uri?, file: File?) {
+        _photoLive.value = PhotoModel(uri, file)
+    }
+
+    fun removePhotoVM() {
+        _photoLive.value = null
+    }
+
 }
 
 data class LoginDefault(val login: String? = null, val pass: String? = null)
 data class LoginRegistrationDefault(
     val login: String? = null,
     val pass: String? = null,
-    val passConfirmation: String? = null,
-    val fullName: String? = null
+    val passConf: String? = null,
+    val fullName: String? = null,
 )

@@ -1,6 +1,7 @@
 package ru.netology.nework.ui.retrofit
 
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -20,7 +21,7 @@ interface PostsRetrofitSuspendInterface {
     suspend fun getAll(): Response<List<Post>>
 
     @GET("posts/latest")
-    suspend fun getLatest(@Query("count") count :Int): Response<List<Post>>
+    suspend fun getLatest(@Query("count") count: Int): Response<List<Post>>
 
     @GET("users")
     suspend fun getUsers(): Response<List<User>>
@@ -29,10 +30,10 @@ interface PostsRetrofitSuspendInterface {
     suspend fun getById(@Path("id") id: Long): Post
 
     @GET("posts/{id}/before")
-    suspend fun getBefore(@Path("id") id: Long, @Query("count") count :Int): Response<List<Post>>
+    suspend fun getBefore(@Path("id") id: Long, @Query("count") count: Int): Response<List<Post>>
 
     @GET("posts/{id}/after")
-    suspend fun getAfter(@Path("id") id: Long, @Query("count") count :Int): Response<List<Post>>
+    suspend fun getAfter(@Path("id") id: Long, @Query("count") count: Int): Response<List<Post>>
 
     @POST("posts")
     suspend fun save(@Body post: Post): Post
@@ -55,7 +56,18 @@ interface PostsRetrofitSuspendInterface {
 
     @FormUrlEncoded
     @POST("users/authentication")
-    suspend fun updateUser(@Field("login") login: String, @Field("pass") pass: String): Response<AuthUploadResponse>
+    suspend fun updateUser(
+        @Field("login") login: String, @Field("pass") pass: String
+    ): Response<AuthUploadResponse>
+
+    @Multipart
+    @POST("users/registration")
+    suspend fun registerUser(
+        @Part("login") login: RequestBody,
+        @Part("pass") pass: RequestBody,
+        @Part("name") name: RequestBody,
+        @Part media: MultipartBody.Part?
+    ): Response<AuthUploadResponse>
 }
 
 //object PostsRetrofitSuspend {

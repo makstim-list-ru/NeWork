@@ -74,7 +74,7 @@ class PostRepositoryOnServer @Inject constructor(
 
         if (uploadFile != null)
             try {
-                responseUpload = upload(uploadFile) ?: let {
+                responseUpload = uploadMedia(uploadFile) ?: let {
                     println("save(post: Post, file: File)->FAULT upload file failure")
                     return
                 }
@@ -166,7 +166,7 @@ class PostRepositoryOnServer @Inject constructor(
 //    }
 
 
-    override suspend fun upload(file: File): MediaUploadResponse? {
+    override suspend fun uploadMedia(file: File): MediaUploadResponse? {
         try {
             val media = MultipartBody.Part.createFormData(
                 "file", file.name, file.asRequestBody()
