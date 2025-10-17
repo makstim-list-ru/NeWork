@@ -86,7 +86,19 @@
             android:padding="12dp"
             app:icon="@drawable/baseline_add_photo_alternate_24"
             app:iconTint="?colorOnPrimary"
+            app:iconSize="32dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/choose_coord"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="choose_coord"
+            android:padding="12dp"
+            app:icon="@drawable/baseline_add_location_alt_24"
+            app:iconTint="?colorOnPrimary"
             app:iconSize="28dp"/>
+
     </LinearLayout>
 
 </RelativeLayout>
