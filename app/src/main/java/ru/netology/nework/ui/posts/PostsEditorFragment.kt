@@ -151,6 +151,12 @@ class PostsEditorFragment : Fragment() {
                         return true
                     }
 
+                    android.R.id.home -> {
+                        viewModel.cancelEditVM()
+                        findNavController().navigateUp()
+                        return true
+                    }
+
                     else -> return false
                 }
             }

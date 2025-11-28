@@ -45,7 +45,7 @@ class PostsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val postsViewModel = ViewModelProvider(this)[PostsViewModel::class.java]
+        val postsViewModel by viewModels<PostsViewModel>()
 
         val authAppStateFlowAsLifeData = authApp.authStateFlow.asLiveData()
 
