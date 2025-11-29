@@ -13,6 +13,5 @@
         android:icon="@drawable/outline_cancel_24"
         android:title="menu_home"
         app:showAsAction="always" />
-        />
 </menu>
 

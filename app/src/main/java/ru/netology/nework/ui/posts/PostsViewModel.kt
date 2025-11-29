@@ -85,14 +85,6 @@ class PostsViewModel @Inject constructor(
         removePhotoVM()
     }
 
-    fun loadAllPostsVM() {
-//        viewModelScope.launch { repository.getPostsAllAsync() }
-    }
-
-    fun loadNewerVM() {
-        viewModelScope.launch { repository.loadNewer() }
-    }
-
     fun changePhotoVM(uri: Uri?, file: File?) {
         _photoLive.value = PhotoModel(uri, file)
     }

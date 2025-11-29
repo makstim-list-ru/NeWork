@@ -50,7 +50,7 @@ class AuthFragment : Fragment() {
                 true -> {
                     Toast.makeText(
                         context,
-                        "Login and/or Password is incorrect, please try again",
+                        "Login and/or Password is incorrect or INTERNET is OFF, please check & try again",
                         Toast.LENGTH_LONG
                     ).show()
                     authViewModel.loginFaultClear()

@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AuthApp @Inject constructor(@ApplicationContext context: Context){
+class AuthApp @Inject constructor(@ApplicationContext context: Context) {
     private val prefs = context.getSharedPreferences("auth", MODE_PRIVATE)
     private val prefsEditor = prefs.edit()
     private val _authStateFlow: MutableStateFlow<AuthState>

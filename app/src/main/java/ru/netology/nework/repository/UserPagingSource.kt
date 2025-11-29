@@ -6,6 +6,7 @@ import okio.IOException
 import retrofit2.HttpException
 import ru.netology.nework.ui.retrofit.PostsRetrofitSuspendInterface
 import ru.netology.nework.ui.retrofit.User
+import timber.log.Timber
 
 class UserPagingSource(
     private val postsRetrofitSuspendInterface: PostsRetrofitSuspendInterface
@@ -33,9 +34,9 @@ class UserPagingSource(
 
             if (response.body().isNullOrEmpty())
                 if (response.body() == null)
-                    println("ERR --------------- postList = response.body() == NULL")
+                    Timber.i("INFO ERR --------------- postList = response.body() == NULL")
                 else
-                    println("ERR --------------- postList = response.body() == EMPTY")
+                    Timber.i("INFO ERR --------------- postList = response.body() == EMPTY")
 
             val userList = response.body().orEmpty()
 

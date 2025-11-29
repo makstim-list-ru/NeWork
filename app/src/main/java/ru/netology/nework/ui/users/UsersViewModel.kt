@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UsersViewModel @Inject constructor(
-    private val repository: PostRepositorySuspend,
+    repository: PostRepositorySuspend,
 ) : ViewModel() {
 
     val data: Flow<PagingData<User>> = repository.getUsersDataFlow().cachedIn(viewModelScope)

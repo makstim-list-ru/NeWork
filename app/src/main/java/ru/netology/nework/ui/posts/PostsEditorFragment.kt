@@ -24,6 +24,7 @@ import com.google.gson.reflect.TypeToken
 import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentPostsEditorBinding
 import ru.netology.nework.ui.retrofit.Post
+import timber.log.Timber
 import java.io.File
 
 class PostsEditorFragment : Fragment() {
@@ -31,7 +32,7 @@ class PostsEditorFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         val bottomNavigationView =
             requireActivity().findViewById<BottomNavigationView>(R.id.nav_view)
@@ -93,7 +94,7 @@ class PostsEditorFragment : Fragment() {
         }
 
         binding.makePhoto.setOnClickListener {
-            println("INFO makePhoto pressed")
+            Timber.i("INFO makePhoto pressed")
             ImagePicker.with(this)
                 .cameraOnly()
                 .crop()                    //Crop image(Optional), Check Customization for more option
@@ -108,7 +109,7 @@ class PostsEditorFragment : Fragment() {
         }
 
         binding.choosePhoto.setOnClickListener {
-            println("INFO choosePhoto pressed")
+            Timber.i("INFO choosePhoto pressed")
             ImagePicker.with(this)
                 .galleryOnly()
                 .crop()
@@ -128,11 +129,11 @@ class PostsEditorFragment : Fragment() {
         activity?.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.menu_new_post, menu)
-                println("INFO toolbarEditor's menu is inflated")
+                Timber.i("INFO toolbarEditor's menu is inflated")
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                println("INFO toolbarEditor item selected $menuItem")
+                Timber.i("INFO toolbarEditor item selected => $menuItem")
                 when (menuItem.itemId) {
                     R.id.saveInToolbarEditor -> {
                         val text = binding.contentPost.text.toString()

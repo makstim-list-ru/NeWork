@@ -16,6 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import okio.IOException
 import ru.netology.nework.R
 import ru.netology.nework.databinding.FragmentAuthRegBinding
+import timber.log.Timber
 
 @AndroidEntryPoint
 class AuthRegFragment : Fragment() {
@@ -47,7 +48,7 @@ class AuthRegFragment : Fragment() {
         binding.authRegPhotoAvatar.visibility = View.GONE
 
         binding.authRegPhotoDummyAvatar.setOnClickListener {
-            println("INFO PhotoDummy pressed")
+            Timber.i("INFO PhotoDummy pressed")
             ImagePicker.with(this)
                 .crop()                    //Crop image(Optional), Check Customization for more option
                 .compress(1024)            //Final image size will be less than 1 MB(Optional)
@@ -139,6 +140,16 @@ class AuthRegFragment : Fragment() {
                 200 -> {
                     authViewModel.loginRegFaultClear()
                     findNavController().navigateUp()
+                }
+
+                -10_000 -> {
+                    Timber.i("INFO loginRegFaultFlag timeout ERROR most probably")
+                    Toast.makeText(
+                        context,
+                        "Something is wrong, most probably INTERNET is OFF, please check & try again",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    authViewModel.loginRegFaultClear()
                 }
 
                 null -> {}

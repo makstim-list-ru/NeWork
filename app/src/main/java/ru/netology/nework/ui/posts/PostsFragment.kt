@@ -9,17 +9,18 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -31,6 +32,7 @@ import ru.netology.nework.databinding.FragmentPostsBinding
 import ru.netology.nework.repository.PostRepositoryOnServer
 import ru.netology.nework.ui.auth.AuthApp
 import ru.netology.nework.ui.auth.AuthStateViewModel
+import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
 
@@ -103,12 +105,30 @@ class PostsFragment : Fragment() {
         binding.postsContainerRecycleView.adapter = adapter
         binding.plusButton.isVisible = authApp.authenticated
 
+        adapter.addLoadStateListener { loadState ->
+            if (loadState.hasError) {
+                Timber.i("INFO loadState.hasError")
+                Toast.makeText(
+                    context,
+                    "Sorry, most probably INTERNET is OFF, check & swipe-refresh",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            binding.swipeRefresh.isRefreshing = loadState.refresh is LoadState.Loading
+        }
+
+        binding.swipeRefresh.setOnRefreshListener {
+            Timber.i("INFO SwipeRefresh event happens")
+            adapter.refresh()
+        }
+
         binding.plusButton.setOnClickListener {
             findNavController().navigate(R.id.action_navigation_home_to_postsEditorFragment)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                Timber.i("INFO postsViewModel.data.collectLatest - adapter.submitData")
                 postsViewModel.data.collectLatest { adapter.submitData(it) }
             }
         }
@@ -119,14 +139,25 @@ class PostsFragment : Fragment() {
         }
 
         postsViewModel.dbFlag.observe(viewLifecycleOwner) {
+            Timber.i("INFO postsViewModel.dbFlag.observe =>   $it")
             when (it) {
-                PostRepositoryOnServer.DbFlagsList.REFRESH_REQUEST -> adapter.refresh()
-                PostRepositoryOnServer.DbFlagsList.ERROR_NETWORK ->
-                    throw IOException("ERROR postsViewModel.dbFlag.observe - ERROR_NETWORK")
+                PostRepositoryOnServer.DbFlagsList.REFRESH_REQUEST -> {
+                    Timber.i("INFO adapter.refresh()")
+                    adapter.refresh()
+                }
+
+                PostRepositoryOnServer.DbFlagsList.ERROR_NETWORK -> {
+                    Timber.i("INFO ERROR postsViewModel.dbFlag.observe - ERROR_NETWORK")
+                    Toast.makeText(
+                        context,
+                        "Sorry, most probably INTERNET is OFF, check & swipe-refresh",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    adapter.notifyDataSetChanged()
+                }
+
                 PostRepositoryOnServer.DbFlagsList.NONE -> {}
             }
-            println("postsViewModel.dbFlag.observe   $it")
-
         }
 
 
@@ -136,12 +167,11 @@ class PostsFragment : Fragment() {
                 val authStateViewModel: AuthStateViewModel by viewModels()
 
                 menuInflater.inflate(R.menu.home_dots_menu, menu)
-                println("INFO toolbarMain's menu is inflated")
+                Timber.i("INFO toolbarMain's menu is inflated")
 
                 authStateViewModel.data.flowWithLifecycle(lifecycle).onEach {
                     menu.setGroupVisible(R.id.unauthenticated, !authStateViewModel.authenticated)
                     menu.setGroupVisible(R.id.authenticated, authStateViewModel.authenticated)
-//                    adapter.refresh()
                 }.launchIn(lifecycleScope)
             }
 
@@ -168,7 +198,6 @@ class PostsFragment : Fragment() {
                 }
 
         }, viewLifecycleOwner)
-
 
         return binding.root
     }

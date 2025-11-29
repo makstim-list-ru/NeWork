@@ -26,8 +26,7 @@ class UsersAdapter(
     override fun getItemViewType(position: Int) = R.layout.user_card
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = getItem(position)
-        when (item) {
+        when (val item = getItem(position)) {
             is User -> (holder as UserViewHolder).onBindUser(item)
             else -> error("unknown item type")
         }

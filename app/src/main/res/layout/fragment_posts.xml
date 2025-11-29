@@ -8,6 +8,13 @@
     android:layout_marginBottom="112dp"
     tools:context=".ui.posts.PostsFragment">
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/posts_container_recycle_view"
         android:layout_width="match_parent"
@@ -22,6 +29,8 @@
         app:fastScrollVerticalThumbDrawable="@drawable/fast_scroll_thumb"
         app:fastScrollVerticalTrackDrawable="@drawable/fast_scroll_track"
         tools:listitem="@layout/post_card" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/plusButton"

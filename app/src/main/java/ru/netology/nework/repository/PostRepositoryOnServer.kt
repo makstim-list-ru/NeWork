@@ -11,13 +11,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import retrofit2.Response
 import ru.netology.nework.ui.retrofit.Attachment
 import ru.netology.nework.ui.retrofit.AttachmentType
 import ru.netology.nework.ui.retrofit.MediaUploadResponse
 import ru.netology.nework.ui.retrofit.Post
 import ru.netology.nework.ui.retrofit.PostsRetrofitSuspendInterface
 import ru.netology.nework.ui.retrofit.User
+import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,9 +26,6 @@ import javax.inject.Singleton
 class PostRepositoryOnServer @Inject constructor(
     private val postsRetrofitSuspendInterface: PostsRetrofitSuspendInterface,
 ) : PostRepositorySuspend {
-
-
-    private val servStat = MutableLiveData(FeedModel())
 
     @OptIn(ExperimentalPagingApi::class)
     private val dataFlow: Flow<PagingData<Post>> = Pager(
@@ -59,12 +56,13 @@ class PostRepositoryOnServer @Inject constructor(
     override suspend fun shareByID(id: Long) = Unit //Nothing to do in this release
 
     override suspend fun removeByID(id: Long) {
-        //TODO dao.removeByID(id)
+
         try {
             postsRetrofitSuspendInterface.removeById(id)
-        } catch (e: Exception) {
-            servStat.postValue(serverStatus(ServerStatus.ERROR))
-            println("removeByID(id: Long)->PostsRetrofitSuspend.retrofitService.removeById(id) ERROR: $e")
+        } catch (_: Exception) {
+            Timber.i("INFO error on network - removeByID")
+            _dbFlag.value = DbFlagsList.ERROR_NETWORK
+            _dbFlag.value = DbFlagsList.NONE
         }
     }
 
@@ -75,11 +73,11 @@ class PostRepositoryOnServer @Inject constructor(
         if (uploadFile != null)
             try {
                 responseUpload = uploadMedia(uploadFile) ?: let {
-                    println("save(post: Post, file: File)->FAULT upload file failure")
+                    Timber.i("INFO save(post: Post, file: File)->FAULT upload file failure")
                     return
                 }
             } catch (e: Exception) {
-                println("save(post: Post)->retrofitService.save(myPost) ERROR: $e")
+                Timber.i("INFO save(post: Post)->retrofitService.save(myPost) ERROR => $e")
                 return
             }
 
@@ -90,9 +88,10 @@ class PostRepositoryOnServer @Inject constructor(
             postsRetrofitSuspendInterface.save(post)
             _dbFlag.value = DbFlagsList.REFRESH_REQUEST
             _dbFlag.value = DbFlagsList.NONE
-        } catch (e: Exception) {
-            servStat.postValue(serverStatus(ServerStatus.ERROR))
-            println("edit(post: Post)->retrofitService.save(postWithAtt) ERROR: $e")
+        } catch (_: Exception) {
+            Timber.i("INFO error on network - saveNewOrOld")
+            _dbFlag.value = DbFlagsList.ERROR_NETWORK
+            _dbFlag.value = DbFlagsList.NONE
         }
     }
 
@@ -103,68 +102,12 @@ class PostRepositoryOnServer @Inject constructor(
             else postsRetrofitSuspendInterface.likeById(id)
             _dbFlag.value = DbFlagsList.REFRESH_REQUEST
             _dbFlag.value = DbFlagsList.NONE
-        } catch (e: Exception) {
-            //todo dao.likeByID(id)
-//            servStat.postValue(serverStatus(ServerStatus.ERROR))
-//            println("likeByID(id: Long)->PostsRetrofitSuspend.retrofitService.likeById(id) ERROR: $e")
-            throw e
+        } catch (_: Exception) {
+            Timber.i("INFO error on network - likeByID")
+            _dbFlag.value = DbFlagsList.ERROR_NETWORK
+            _dbFlag.value = DbFlagsList.NONE
         }
     }
-
-    override suspend fun loadNewer() {
-        println("Button <loadNewer> pressed")
-        flagLoad = true
-
-        //todo
-
-//        try {
-//            val response = postsRetrofitSuspendInterface.getPostsNewer(
-//                dao.getMaxId() ?: 0L
-//            )
-//            if (response.isSuccessful) {
-//                servStat.postValue(serverStatus(ServerStatus.OK))
-//                val posts = response.body()
-//                if (!posts.isNullOrEmpty()) {
-//                    dao.insert(posts.map { PostEntity.fromPostToEntity(it) })
-//                } else {
-//                    println("loadNewer()->!posts.isNullOrEmpty() FAULT: if-else")
-//                }
-//            } else {
-//                servStat.postValue(serverStatus(ServerStatus.ERROR))
-//                println("loadNewer()->response.isSuccessful ERROR: if-else")
-//            }
-//        } catch (e: Exception) {
-//            servStat.postValue(serverStatus(ServerStatus.ERROR))
-//            println("loadNewer()->PostsRetrofitSuspend.retrofitService.getPostsNewer ERROR: $e")
-//        }
-
-        flagLoad = false
-    }
-
-//    private fun getPostsNewer(): Flow<Int> = flow {
-//        while (true) {
-//            delay(10_000)
-//            val response = postsRetrofitSuspendInterface.getPostsNewer(dao.getMaxId() ?: 0L)
-//            if (response.isSuccessful) {
-//                servStat.postValue(serverStatus(ServerStatus.OK))
-//                val posts = response.body()
-//                if (!posts.isNullOrEmpty()) {
-//                    if (flagLoad) {
-//                        println("flagLoad is ON")
-//                    } else {
-//                        emit(posts.size)
-//                    }
-//                } else emit(0)
-//            } else {
-//                servStat.postValue(serverStatus(ServerStatus.ERROR))
-//                println("getPostsNewer()->response.isSuccessful ERROR: if-else")
-//            }
-//        }
-//    }.catch {
-//        servStat.postValue(serverStatus(ServerStatus.ERROR))
-//        println("getPostsNewer()->catch ERROR: CATCH")
-//    }
-
 
     override suspend fun uploadMedia(file: File): MediaUploadResponse? {
         try {
@@ -174,47 +117,20 @@ class PostRepositoryOnServer @Inject constructor(
 
             val response = postsRetrofitSuspendInterface.upload(media)
             if (!response.isSuccessful) {
-                println("upload->response.isSuccessful ERROR: if-else")
+                Timber.i("INFO upload->response.isSuccessful ERROR: if-else")
                 return null
             }
 
             return response.body()
         } catch (e: Exception) {
-            println("upload->CATCH ERROR: $e")
+            Timber.i("INFO upload->CATCH ERROR => $e")
             return null
         }
-    }
-
-
-    private fun <T> retrofitErrorHandler(res: Response<T>): T? {
-        if (res.isSuccessful) {
-            servStat.postValue(serverStatus(ServerStatus.OK))
-            return res.body()
-        } else {
-            servStat.postValue(serverStatus(ServerStatus.ERROR))
-            println("retrofitErrorHandler(res: Response<T>)->res.isSuccessful ERROR: if-else")
-        }
-        return null
-    }
-
-    private fun serverStatus(status: ServerStatus): FeedModel {
-        return when (status) {
-            ServerStatus.LOADING -> FeedModel(loading = true)
-            ServerStatus.ERROR -> FeedModel(error = true)
-            ServerStatus.EMPTY -> FeedModel(empty = true)
-            ServerStatus.REFRESHING -> FeedModel(refreshing = true)
-            else -> FeedModel()
-        }
-    }
-
-    private enum class ServerStatus {
-        LOADING, ERROR, EMPTY, REFRESHING, OK
     }
 
     enum class DbFlagsList {
         REFRESH_REQUEST, ERROR_NETWORK, NONE
     }
-
 
 }
 

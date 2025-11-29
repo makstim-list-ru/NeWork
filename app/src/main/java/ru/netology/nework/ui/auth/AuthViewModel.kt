@@ -13,6 +13,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import ru.netology.nework.ui.retrofit.PhotoModel
 import ru.netology.nework.ui.retrofit.PostsRetrofitSuspendInterface
+import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
 
@@ -68,15 +69,20 @@ class AuthViewModel @Inject constructor(
     }
 
     private suspend fun login(login: String, pass: String): AuthUploadResponse? {
-        val response = postsRetrofitSuspendInterface.updateUser(login, pass)
-        if (!response.isSuccessful) {
-            println("login->response.isSuccessful ERROR: if-else")
+        try {
+            val response = postsRetrofitSuspendInterface.updateUser(login, pass)
+
+            if (!response.isSuccessful) {
+                Timber.i("INFO login->response.isSuccessful ERROR: if-else")
+                return null
+            }
+            val authUploadResponse = requireNotNull(response.body())
+            Timber.i("INFO authUploadResponse => $authUploadResponse")
+            authApp.setAuth(id = authUploadResponse.id, token = authUploadResponse.token)
+            return response.body()
+        } catch (_: Exception) {
             return null
         }
-        val authUploadResponse = requireNotNull(response.body())
-        println(authUploadResponse)
-        authApp.setAuth(id = authUploadResponse.id, token = authUploadResponse.token)
-        return response.body()
     }
 
     private suspend fun loginReg(
@@ -84,26 +90,29 @@ class AuthViewModel @Inject constructor(
         pass: String,
         fullName: String,
     ) {
+        try {
+            val file = photoLive.value?.file
+            val media = file?.let {
+                MultipartBody.Part.createFormData(
+                    "file", file.name, file.asRequestBody()
+                )
+            }
 
-        val file = photoLive.value?.file
-        val media = file?.let {
-            MultipartBody.Part.createFormData(
-                "file", file.name, file.asRequestBody()
+            val mediaType = "text/plain; charset=utf-8".toMediaType()
+            val response = postsRetrofitSuspendInterface.registerUser(
+                login.toRequestBody(mediaType),
+                pass.toRequestBody(mediaType),
+                fullName.toRequestBody(mediaType),
+                media
             )
+            if (response.isSuccessful) {
+                val authUploadResponse = requireNotNull(response.body())
+                authApp.setAuth(id = authUploadResponse.id, token = authUploadResponse.token)
+            }
+            _loginRegFaultFlag.value = response.code()
+        } catch (_: Exception) {
+            _loginRegFaultFlag.value = -10_000
         }
-
-        val mediaType = "text/plain; charset=utf-8".toMediaType()
-        val response = postsRetrofitSuspendInterface.registerUser(
-            login.toRequestBody(mediaType),
-            pass.toRequestBody(mediaType),
-            fullName.toRequestBody(mediaType),
-            media
-        )
-        if (response.isSuccessful) {
-            val authUploadResponse = requireNotNull(response.body())
-            authApp.setAuth(id = authUploadResponse.id, token = authUploadResponse.token)
-        }
-        _loginRegFaultFlag.value = response.code()
     }
 
     fun changePhotoVM(uri: Uri?, file: File?) {

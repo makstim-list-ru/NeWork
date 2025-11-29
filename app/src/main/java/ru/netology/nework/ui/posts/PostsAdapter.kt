@@ -41,8 +41,7 @@ class PostsAdapter(
     override fun getItemViewType(position: Int) = R.layout.post_card
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = getItem(position)
-        when (item) {
+        when (val item = getItem(position)) {
             is Post -> (holder as PostViewHolder).onBindPost(item)
             else -> error("unknown item type")
         }
@@ -230,20 +229,6 @@ class PostViewHolder(
                         }
                     }
             }
-
-//            post.attachment?.let {
-//                postMediaBox.visibility = View.VISIBLE
-//                val urlMedia = post.attachment.url
-//                Glide.with(postMediaBox)
-//                    .load(urlMedia)
-//                    .placeholder(R.drawable.ic_loading_100dp)
-//                    .error(R.drawable.ic_error_100dp)
-//                    .timeout(10_000)
-//                    .into(postMediaBox)
-//            } ?: {
-//                Glide.with(postMediaBox).clear(postMediaBox)
-//                postMediaBox.visibility = View.GONE
-//            }
         }
     }
 
